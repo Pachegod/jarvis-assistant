@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  jarvis-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jarvis-assistant
+    restart: unless-stopped
+    environment:
+      # Load from .env file
+      - GOOGLE_CREDENTIALS_PATH=${GOOGLE_CREDENTIALS_PATH}
+      - GOOGLE_TOKEN_PATH=${GOOGLE_TOKEN_PATH}
+      - GMAIL_USER_EMAIL=${GMAIL_USER_EMAIL}
+      - GMAIL_TASK_LABEL=${GMAIL_TASK_LABEL}
+      - CALENDAR_ID=${CALENDAR_ID}
+      - CLAUDE_CODE_API_KEY=${CLAUDE_CODE_API_KEY}
+      - CLAUDE_CODE_USER_ID=${CLAUDE_CODE_USER_ID}
+      - CLAUDE_CODE_SESSION_ID=${CLAUDE_CODE_SESSION_ID}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_CHANNEL=${SLACK_CHANNEL}
+      - SCHEDULE_TIME=${SCHEDULE_TIME:-08:30}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+    volumes:
+      # Mount credentials
+      - ./credentials.json:/app/credentials.json:ro
+      - ./token.pickle:/app/token.pickle
+      - ./logs:/app/logs
+    networks:
+      - jarvis-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  jarvis-network:
+    driver: bridge
