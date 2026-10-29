@@ -1,39 +1,49 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  jarvis-assistant:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: jarvis-assistant
-    restart: unless-stopped
+  postgres:
+    image: postgres:16
     environment:
-      # Load from .env file
-      - GOOGLE_CREDENTIALS_PATH=${GOOGLE_CREDENTIALS_PATH}
-      - GOOGLE_TOKEN_PATH=${GOOGLE_TOKEN_PATH}
-      - GMAIL_USER_EMAIL=${GMAIL_USER_EMAIL}
-      - GMAIL_TASK_LABEL=${GMAIL_TASK_LABEL}
-      - CALENDAR_ID=${CALENDAR_ID}
-      - CLAUDE_CODE_API_KEY=${CLAUDE_CODE_API_KEY}
-      - CLAUDE_CODE_USER_ID=${CLAUDE_CODE_USER_ID}
-      - CLAUDE_CODE_SESSION_ID=${CLAUDE_CODE_SESSION_ID}
-      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
-      - SLACK_CHANNEL=${SLACK_CHANNEL}
-      - SCHEDULE_TIME=${SCHEDULE_TIME:-08:30}
-      - ENVIRONMENT=${ENVIRONMENT:-production}
+      POSTGRES_USER: jarvis
+      POSTGRES_PASSWORD: jarvis_password
+      POSTGRES_DB: jarvis_db
     volumes:
-      # Mount credentials
-      - ./credentials.json:/app/credentials.json:ro
-      - ./token.pickle:/app/token.pickle
-      - ./logs:/app/logs
-    networks:
-      - jarvis-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jarvis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://jarvis:jarvis_password@postgres:5432/jarvis_db
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --reload
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+
+volumes:
+  postgres_data:
 
 networks:
-  jarvis-network:
-    driver: bridge
+  default:
+    name: jarvis-network

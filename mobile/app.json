@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "jarvis-assistant",
+    "slug": "jarvis-assistant",
+    "version": "1.0.0",
+    "assetBundlePatterns": ["**/*"],
+    "plugins": ["expo-font"],
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_PROJECT_ID"
+      }
+    }
+  }
+}

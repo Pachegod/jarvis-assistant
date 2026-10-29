@@ -1,76 +1,110 @@
-.PHONY: help install run schedule setup clean test docker-build docker-up docker-down
+.PHONY: help install setup dev build deploy clean
 
 help:
-	@echo "Jarvis Assistant - Available Commands"
-	@echo "====================================="
+	@echo "Jarvis Assistant - Development Commands"
 	@echo ""
-	@echo "make install      - Install Python dependencies"
-	@echo "make run          - Run the assistant once"
-	@echo "make schedule     - Start the scheduler (runs daily at 8:30 AM)"
-	@echo "make setup        - Initial setup (install + create env)"
-	@echo "make clean        - Remove cache and temporary files"
-	@echo "make test         - Run tests (when available)"
+	@echo "Setup & Installation:"
+	@echo "  make setup              Setup everything"
+	@echo "  make install            Install all dependencies"
 	@echo ""
-	@echo "Docker commands:"
-	@echo "make docker-build - Build Docker image"
-	@echo "make docker-up    - Start Docker container"
-	@echo "make docker-down  - Stop Docker container"
+	@echo "Backend:"
+	@echo "  make backend-install    Install backend dependencies"
+	@echo "  make backend-dev        Run backend dev server"
+	@echo "  make backend-test       Run backend tests"
 	@echo ""
+	@echo "Frontend:"
+	@echo "  make frontend-install   Install frontend dependencies"
+	@echo "  make frontend-dev       Run frontend dev server"
+	@echo "  make frontend-build     Build frontend"
+	@echo ""
+	@echo "Mobile:"
+	@echo "  make mobile-install     Install mobile dependencies"
+	@echo ""
+	@echo "CLI:"
+	@echo "  make cli-install        Install CLI dependencies"
+	@echo ""
+	@echo "Docker:"
+	@echo "  make docker-build       Build Docker images"
+	@echo "  make docker-up          Start all services"
+	@echo "  make docker-down        Stop all services"
+	@echo "  make docker-logs        View Docker logs"
+	@echo ""
+	@echo "Database:"
+	@echo "  make db-migrate         Run database migrations"
+	@echo "  make db-reset           Reset database"
+	@echo ""
+	@echo "Full Stack:"
+	@echo "  make dev                Run all dev servers"
+	@echo "  make clean              Clean up cache and artifacts"
 
-install:
-	@echo "Installing dependencies..."
-	pip install -r requirements.txt
-	@echo "Dependencies installed successfully!"
+setup:
+	@echo "Setting up Jarvis Assistant..."
+	@echo "1. Installing backend..."
+	cd backend && pip install -r requirements.txt
+	@echo "2. Installing frontend..."
+	cd frontend && npm install
+	@echo "3. Installing CLI..."
+	cd cli && pip install -r requirements.txt
+	@echo "Setup complete! Run 'make dev' to start development"
 
-run:
-	@echo "Running Jarvis Assistant..."
-	python -m src.main
+install: setup
 
-schedule:
-	@echo "Starting scheduler..."
-	python -m src.scheduler
+backend-install:
+	cd backend && pip install -r requirements.txt
 
-setup: install
-	@echo "Setting up environment..."
-	@if [ ! -f .env ]; then \
-		cp .env.example .env; \
-		echo "Created .env file - please update with your credentials"; \
-	else \
-		echo ".env file already exists"; \
-	fi
-	@echo "Setup completed!"
+backend-dev:
+	cd backend && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-clean:
-	@echo "Cleaning cache and temporary files..."
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete
-	find . -type f -name "*.pyo" -delete
-	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
-	find . -type d -name ".coverage" -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name ".coverage" -delete
-	@echo "Cleanup completed!"
+backend-test:
+	cd backend && pytest
 
-test:
-	@echo "Running tests..."
-	pytest -v
-	@echo "Tests completed!"
+frontend-install:
+	cd frontend && npm install
+
+frontend-dev:
+	cd frontend && npm run dev
+
+frontend-build:
+	cd frontend && npm run build
+
+mobile-install:
+	cd mobile && npm install
+
+cli-install:
+	cd cli && pip install -r requirements.txt
 
 docker-build:
-	@echo "Building Docker image..."
 	docker-compose build
-	@echo "Docker image built successfully!"
 
 docker-up:
-	@echo "Starting Docker container..."
 	docker-compose up -d
-	@echo "Docker container started! Check logs with: docker-compose logs -f"
 
 docker-down:
-	@echo "Stopping Docker container..."
 	docker-compose down
-	@echo "Docker container stopped!"
 
 docker-logs:
 	docker-compose logs -f
 
-.DEFAULT_GOAL := help
+db-migrate:
+	cd backend && alembic upgrade head
+
+db-reset:
+	docker-compose down -v
+	docker-compose up -d postgres
+	@echo "Database reset. Run 'make db-migrate' to create tables"
+
+dev:
+	@echo "Starting Jarvis Assistant stack..."
+	@echo "Backend: http://localhost:8000"
+	@echo "Frontend: http://localhost:5173"
+	@echo "API Docs: http://localhost:8000/docs"
+	@echo ""
+	docker-compose up
+
+clean:
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name node_modules -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name dist -exec rm -rf {} + 2>/dev/null || true
+	@echo "Cleanup complete!"

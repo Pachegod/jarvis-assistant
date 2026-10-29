@@ -1,186 +1,86 @@
 # Jarvis Assistant
 
-Um assistente inteligente que integra Gmail, Google Calendar e Claude Code para automatizar gerenciamento de tarefas e calendário, com notificações via Slack.
+Personal AI assistant with voice control, multiple interfaces, and cloud sync.
 
-## Funcionalidades
+## Features
 
-- Sincronização de tarefas do Gmail
-- Integração com Google Calendar
-- Busca de tasks do Claude Code
-- Notificações diárias no Slack
-- Agendamento automático (8:30 AM)
+- 🎤 **Voice Control**: Speech-to-Text and Text-to-Speech capabilities
+- 💬 **Multi-Platform**: Web, Mobile, CLI, and Desktop interfaces
+- 🧠 **AI-Powered**: Claude API integration for intelligent conversations
+- 🔄 **Cloud Sync**: Synchronize data across all devices
+- 📊 **Task Management**: Integrated task and productivity tools
+- 📧 **Email & Calendar**: Gmail and Google Calendar integration
+- 🏠 **Smart Home**: Control smart home devices
+- 🔍 **Web Search**: Integrated web search capabilities
+- 💾 **User Preferences**: Learn and adapt to user preferences
+- 🔐 **Secure**: End-to-end encryption for sensitive data
 
-## Requisitos
+## Technology Stack
 
-- Python 3.8+
-- Docker e Docker Compose (opcional)
-- Credenciais de API para:
-  - Google Workspace (Gmail, Calendar)
-  - Slack
-  - Claude Code (API)
+- **Backend**: FastAPI + SQLAlchemy + PostgreSQL
+- **Frontend**: React 18 + TypeScript + Vite
+- **Mobile**: React Native (Expo)
+- **CLI**: Python + Click
+- **AI**: Anthropic Claude API
+- **Voice**: Google Cloud Speech-to-Text & Text-to-Speech
+- **Infrastructure**: Docker + Docker Compose
 
-## Instalação
+## Quick Start
 
-### Setup Local
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- Docker & Docker Compose
+- PostgreSQL 15+
 
-1. Clone o repositório:
+### Installation
+
 ```bash
-git clone <repo-url>
+# Clone repository
+git clone https://github.com/yourusername/jarvis-assistant.git
 cd jarvis-assistant
-```
 
-2. Crie um ambiente virtual:
-```bash
-python -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
-```
-
-3. Instale as dependências:
-```bash
-make install
-# ou manualmente: pip install -r requirements.txt
-```
-
-4. Configure as variáveis de ambiente:
-```bash
-cp .env.example .env
-# Edite .env com suas credenciais
-```
-
-5. Setup inicial:
-```bash
+# Setup everything
 make setup
+
+# Start development
+make dev
 ```
 
-### Setup com Docker
+### Development
 
-```bash
-docker-compose up -d
-```
+- **Backend**: `make backend-dev` (http://localhost:8000)
+- **Frontend**: `make frontend-dev` (http://localhost:5173)
+- **API Docs**: http://localhost:8000/docs
+- **CLI**: `python -m cli --help`
 
-## Uso
-
-### Executar uma vez:
-```bash
-make run
-```
-
-### Iniciar scheduler (executa diariamente às 8:30 AM):
-```bash
-make schedule
-```
-
-### Comandos disponíveis:
-
-```bash
-make install     # Instala dependências
-make run         # Executa uma vez
-make schedule    # Inicia scheduler
-make setup       # Setup inicial
-make clean       # Remove cache e arquivos temporários
-```
-
-## Estrutura do Projeto
+## Project Structure
 
 ```
 jarvis-assistant/
-├── src/
-│   ├── main.py                 # Script principal
-│   ├── scheduler.py            # Configuração de agendamento
-│   └── integrations/
-│       ├── __init__.py
-│       ├── gmail.py            # Integração Gmail
-│       ├── calendar.py         # Integração Google Calendar
-│       ├── claude_code.py      # Integração Claude Code
-│       └── slack.py            # Integração Slack
-├── requirements.txt            # Dependências Python
-├── .env.example               # Template de variáveis de ambiente
-├── .gitignore                 # Arquivos ignorados
-├── Makefile                   # Comandos úteis
-├── docker-compose.yml         # Configuração Docker
-└── README.md                  # Este arquivo
+├── backend/          # FastAPI backend
+├── frontend/         # React web interface
+├── mobile/           # React Native mobile app
+├── cli/              # Command-line interface
+└── docs/             # Documentation
 ```
 
-## Configuração de Variáveis de Ambiente
+## Documentation
 
-Crie um arquivo `.env` baseado em `.env.example` com:
+- [Architecture](docs/ARCHITECTURE.md) - System design and architecture
+- [Setup Guide](docs/SETUP.md) - Detailed installation instructions
+- [API Documentation](docs/API.md) - REST API reference
+- [Integrations](docs/INTEGRATIONS.md) - External service integrations
+- [Development](docs/DEVELOPMENT.md) - Developer guide
 
-```env
-# Google Workspace
-GOOGLE_CREDENTIALS_PATH=credentials.json
-GOOGLE_TOKEN_PATH=token.pickle
+## Contributing
 
-# Gmail
-GMAIL_USER_EMAIL=seu-email@gmail.com
-GMAIL_TASK_LABEL=Tarefas
+See [DEVELOPMENT.md](docs/DEVELOPMENT.md) for contribution guidelines.
 
-# Google Calendar
-CALENDAR_ID=seu-calendar-id@gmail.com
+## License
 
-# Claude Code
-CLAUDE_CODE_API_KEY=sua-api-key
-CLAUDE_CODE_USER_ID=seu-user-id
+MIT License - see LICENSE file for details
 
-# Slack
-SLACK_BOT_TOKEN=xoxb-seu-token
-SLACK_CHANNEL=C123456789
+## Contact
 
-# Agendamento
-SCHEDULE_TIME=08:30
-```
-
-## Fluxo de Funcionamento
-
-1. **Carregamento de Credenciais**: Lê variáveis de ambiente
-2. **Sincronização Gmail**: Busca tarefas com label específico
-3. **Integração Calendar**: Consulta compromissos do dia
-4. **Busca Claude Code**: Recupera tasks e PRs em progresso
-5. **Montagem de Mensagem**: Formata informações em um resumo
-6. **Envio Slack**: Publica no canal configurado
-
-## Autenticação Google
-
-Veja a [documentação de autenticação Google](https://developers.google.com/identity/protocols/oauth2) para gerar credenciais de API.
-
-## Desenvolvimento
-
-```bash
-# Ativar ambiente virtual
-source venv/bin/activate
-
-# Instalar em modo desenvolvimento
-pip install -e .
-
-# Executar testes (quando disponíveis)
-pytest
-```
-
-## Troubleshooting
-
-### Erro de autenticação Google
-- Verifique se as credenciais estão no arquivo correto
-- Confirme se as APIs estão habilitadas no Google Cloud Console
-
-### Mensagens não chegam ao Slack
-- Verifique o token do bot
-- Confirme se o bot tem permissão no canal
-
-### Scheduler não inicia
-- Verifique se todas as variáveis de ambiente estão configuradas
-- Confira os logs: `python -m src.scheduler`
-
-## Contribuindo
-
-1. Crie uma branch: `git checkout -b feature/sua-feature`
-2. Faça suas alterações
-3. Commit: `git commit -m "Descrição clara"`
-4. Push: `git push origin feature/sua-feature`
-5. Abra um Pull Request
-
-## Licença
-
-Este projeto é privado e confidencial.
-
-## Contato
-
-Para dúvidas ou sugestões, entre em contato com a equipe.
+For questions and support, open an issue on GitHub.
